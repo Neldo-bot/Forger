@@ -9,6 +9,9 @@ import {
   type SlideData,
 } from '../types/elements';
 
+// Define PanelType here for now
+export type PanelType = 'text' | 'elements' | 'design' | 'properties' | 'layers' | null;
+
 const createNewSlide = (elements: CanvasElement[] = []): Slide => ({
   id: `slide-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
   elements,
@@ -17,6 +20,8 @@ const createNewSlide = (elements: CanvasElement[] = []): Slide => ({
 const HomePage: React.FC = () => {
   const [slides, setSlides] = useState<Slide[]>([]);
   const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
+  // New state for active panel
+  const [activePanel, setActivePanel] = useState<PanelType>('text'); // Default to 'text'
 
   const currentSlide: Slide | undefined = useMemo(() => {
     if (slides.length === 0 && currentSlideIndex === 0) {
@@ -28,6 +33,11 @@ const HomePage: React.FC = () => {
   const currentElements: CanvasElement[] = useMemo(() => {
     return currentSlide ? currentSlide.elements : [];
   }, [currentSlide]);
+
+  // New callback function to change active panel
+  const handleChangeActivePanel = useCallback((panelName: PanelType) => {
+    setActivePanel(panelName);
+  }, []);
 
   const handleAddTextElement = useCallback(() => {
     setSlides(prevSlides => {
@@ -177,6 +187,10 @@ const HomePage: React.FC = () => {
 
   return (
     <MainLayout
+      // Pass new props for active panel management
+      activePanel={activePanel}
+      onChangeActivePanel={handleChangeActivePanel}
+      // Pass existing props (some are still unused by MainLayout but defined in its props)
       onAddText={handleAddTextElement}
       onLoadSlides={handleLoadSlidesFromMarkdown}
       currentSlideNumber={slides.length > 0 ? currentSlideIndex + 1 : 0}

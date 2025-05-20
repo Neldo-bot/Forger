@@ -1,48 +1,74 @@
 import React from 'react';
+import { FileText, LayoutDashboard, Settings, Layers, Palette } from 'lucide-react';
+// Import PanelType (adjust path if you move PanelType later)
+import { type PanelType } from '../../app/page';
 
-// A simple SVG icon placeholder (e.g., a square)
-const PlaceholderIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    className={`w-6 h-6 text-gray-400 group-hover:text-white ${className}`}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      d="M4 6h16M4 12h16m-7 6h7" // Simple lines icon
-    ></path>
-  </svg>
-);
+interface IconSidebarProps {
+  onChangeActivePanel: (panelName: PanelType) => void;
+  activePanel: PanelType; // To style the active icon
+}
 
+const IconSidebar: React.FC<IconSidebarProps> = ({ onChangeActivePanel, activePanel }) => {
+  const iconButtonClass = (panelName: PanelType) =>
+    `p-3 rounded-lg hover:bg-gray-600 transition-colors cursor-pointer ${
+      activePanel === panelName ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'
+    }`;
 
-const IconSidebar: React.FC = () => {
   return (
-    <div className="w-16 bg-gray-900 text-white p-3 flex flex-col items-center space-y-6">
-      {/* Icon for the app or brand - optional */}
-      <div className="my-2">
-        <svg className="w-8 h-8 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 3.5a1.5 1.5 0 011.395 2.265l-4.146 7.255a1.5 1.5 0 01-2.79-.001L.605 5.765A1.5 1.5 0 012 3.5h8zm5.594 1.803a1.5 1.5 0 00-2.413-1.025L10 7.182l-1.182-2.904a1.5 1.5 0 00-2.79-.001L.605 11.022a1.5 1.5 0 002.413 1.025L10 9.142l4.182 2.904a1.5 1.5 0 002.79.001l3.854-6.745a1.5 1.5 0 00-1.151-2.524z"></path>
-        </svg>
+    <aside className="w-16 bg-gray-800 p-3 flex flex-col items-center space-y-4 border-r border-gray-700">
+      {/* Placeholder for Logo or App Icon */}
+      <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-md">
+        SF
       </div>
 
-      <button className="p-2 rounded-lg hover:bg-gray-700 focus:outline-none focus:bg-gray-700 group w-full flex flex-col items-center">
-        <PlaceholderIcon />
-        <span className="text-xs mt-1 group-hover:text-white text-gray-400">Diseño</span>
-      </button>
-      <button className="p-2 rounded-lg hover:bg-gray-700 focus:outline-none focus:bg-gray-700 group w-full flex flex-col items-center">
-        <PlaceholderIcon />
-        <span className="text-xs mt-1 group-hover:text-white text-gray-400">Elementos</span>
-      </button>
-      <button className="p-2 rounded-lg hover:bg-gray-700 focus:outline-none focus:bg-gray-700 group w-full flex flex-col items-center">
-        <PlaceholderIcon />
-        <span className="text-xs mt-1 group-hover:text-white text-gray-400">Texto</span>
-      </button>
-      {/* Add more icons/buttons as needed */}
-    </div>
+      <nav className="flex flex-col space-y-3 mt-5">
+        <div
+          onClick={() => onChangeActivePanel('text')}
+          className={iconButtonClass('text')}
+          title="Texto"
+        >
+          <FileText size={24} />
+        </div>
+        <div
+          onClick={() => onChangeActivePanel('elements')}
+          className={iconButtonClass('elements')}
+          title="Elementos"
+        >
+          <LayoutDashboard size={24} />
+        </div>
+        <div
+          onClick={() => onChangeActivePanel('design')}
+          className={iconButtonClass('design')}
+          title="Diseño"
+        >
+          <Palette size={24} />
+        </div>
+        <div
+          onClick={() => onChangeActivePanel('layers')}
+          className={iconButtonClass('layers')}
+          title="Capas"
+        >
+          <Layers size={24} />
+        </div>
+        {/* Properties panel might be context-dependent, not directly selectable here */}
+        {/* Or it could be a general properties view */}
+        <div
+          onClick={() => onChangeActivePanel('properties')}
+          className={iconButtonClass('properties')}
+          title="Propiedades"
+        >
+          <Settings size={24} />
+        </div>
+      </nav>
+
+      {/* Spacer to push settings to bottom, if any */}
+      <div className="flex-grow"></div>
+
+      {/* Example: Settings Icon at the bottom */}
+      {/* <div className={iconButtonClass(null)} title="Ajustes App"> // null or a specific panel
+        <Settings size={24} />
+      </div> */}
+    </aside>
   );
 };
 
