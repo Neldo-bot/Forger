@@ -8,9 +8,7 @@ import {
   type CanvasElement,
   type SlideData,
 } from '../types/elements';
-
-// Define PanelType here for now
-export type PanelType = 'text' | 'elements' | 'design' | 'properties' | 'layers' | null;
+import { type PanelType } from '../types/ui';
 
 const createNewSlide = (elements: CanvasElement[] = []): Slide => ({
   id: `slide-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
@@ -19,9 +17,8 @@ const createNewSlide = (elements: CanvasElement[] = []): Slide => ({
 
 const HomePage: React.FC = () => {
   const [slides, setSlides] = useState<Slide[]>([]);
-  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
-  // New state for active panel
-  const [activePanel, setActivePanel] = useState<PanelType>('text'); // Default to 'text'
+  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0); // 0-based
+  const [activePanel, setActivePanel] = useState<PanelType>('text');
 
   const currentSlide: Slide | undefined = useMemo(() => {
     if (slides.length === 0 && currentSlideIndex === 0) {
@@ -34,7 +31,6 @@ const HomePage: React.FC = () => {
     return currentSlide ? currentSlide.elements : [];
   }, [currentSlide]);
 
-  // New callback function to change active panel
   const handleChangeActivePanel = useCallback((panelName: PanelType) => {
     setActivePanel(panelName);
   }, []);
@@ -55,6 +51,15 @@ const HomePage: React.FC = () => {
           newSlides = [firstSlide];
           targetSlideIndex = 0;
         }
+      }
+
+      if (!newSlides[targetSlideIndex] && newSlides.length > 0) {
+        console.warn("Attempting to add text to a non-existent slide index, defaulting to last.");
+        targetSlideIndex = newSlides.length - 1;
+      } else if (newSlides.length === 0) {
+        const firstSlide = createNewSlide();
+        newSlides = [firstSlide];
+        targetSlideIndex = 0;
       }
 
       const slideToUpdate = newSlides[targetSlideIndex];
@@ -132,7 +137,9 @@ const HomePage: React.FC = () => {
 
   const handleLoadSlidesFromMarkdown = useCallback((parsedSlidesData: SlideData[]) => {
     if (parsedSlidesData.length === 0) {
-      console.warn("No slides data received from Markdown to load.");
+      setSlides([]);
+      setCurrentSlideIndex(0);
+      console.warn("No slides data received from Markdown to load. Slides cleared.");
       return;
     }
     const newSlidesArray: Slide[] = parsedSlidesData.map((slideData, slideIdx) => ({
@@ -169,31 +176,34 @@ const HomePage: React.FC = () => {
 
   const handleAddEmptySlide = useCallback(() => {
     const newEmptySlide = createNewSlide();
-    setSlides(prevSlides => [...prevSlides, newEmptySlide]);
-    setCurrentSlideIndex(slides.length === 0 ? 0 : slides.length);
-  }, [slides]);
+    setSlides(prevSlides => {
+      const newSlidesArray = [...prevSlides, newEmptySlide];
+      setCurrentSlideIndex(newSlidesArray.length - 1);
+      return newSlidesArray;
+    });
+  }, []);
 
   const handleDeleteCurrentSlide = useCallback(() => {
     if (slides.length === 0) return;
-    if (slides.length === 1 && currentSlideIndex === 0) {
-      setSlides([createNewSlide()]);
-      setCurrentSlideIndex(0);
-      return;
-    }
-    const newSlidesArray = slides.filter((_, index) => index !== currentSlideIndex);
-    setSlides(newSlidesArray);
-    setCurrentSlideIndex(prevIdx => Math.min(Math.max(0, newSlidesArray.length - 1), prevIdx === slides.length - 1 ? prevIdx - 1 : prevIdx));
+
+    setSlides(prevSlides => {
+      const newSlidesArray = prevSlides.filter((_, index) => index !== currentSlideIndex);
+      if (newSlidesArray.length === 0) {
+        setCurrentSlideIndex(0);
+      } else if (currentSlideIndex >= newSlidesArray.length) {
+        setCurrentSlideIndex(newSlidesArray.length - 1);
+      }
+      return newSlidesArray;
+    });
   }, [currentSlideIndex, slides]);
 
   return (
     <MainLayout
-      // Pass new props for active panel management
       activePanel={activePanel}
       onChangeActivePanel={handleChangeActivePanel}
-      // Pass existing props (some are still unused by MainLayout but defined in its props)
       onAddText={handleAddTextElement}
       onLoadSlides={handleLoadSlidesFromMarkdown}
-      currentSlideNumber={slides.length > 0 ? currentSlideIndex + 1 : 0}
+      currentSlideIndex={currentSlideIndex}
       totalSlides={slides.length}
       onNextSlide={handleNextSlide}
       onPrevSlide={handlePrevSlide}

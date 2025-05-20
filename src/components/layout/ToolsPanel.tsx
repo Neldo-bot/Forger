@@ -1,6 +1,7 @@
 import React from 'react';
 import { type SlideData } from '../../types/elements';
-import { type PanelType } from '../../app/page'; // Assuming PanelType is exported from page.tsx
+// Correct the import path for PanelType
+import { type PanelType } from '../../types/ui';
 
 // Import the new panel components
 import TextToolsPanel from '../toolsPanels/TextToolsPanel';

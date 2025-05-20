@@ -1,26 +1,26 @@
 import React from 'react';
 
-// Interface defining the props TopBar accepts
 interface TopBarProps {
-  currentSlideNumber?: number;
+  currentSlideIndex?: number; // 0-based
   totalSlides?: number;
   onNextSlide?: () => void;
   onPrevSlide?: () => void;
-  onAddSlide?: () => void;
-  onDeleteSlide?: () => void;
+  onAddSlide?: () => void; // Renamed from onAddEmptySlide if preferred, ensure MainLayout passes correctly
+  onDeleteSlide?: () => void; // Renamed from onDeleteCurrentSlide if preferred
   presentationTitle?: string;
 }
 
-// The component itself, correctly typed with React.FC<TopBarProps>
 const TopBar: React.FC<TopBarProps> = ({
-  currentSlideNumber,
-  totalSlides,
+  currentSlideIndex = 0, // Default to 0 if undefined
+  totalSlides = 0,     // Default to 0 if undefined
   onNextSlide,
   onPrevSlide,
   onAddSlide,
   onDeleteSlide,
-  presentationTitle = "Mi Presentación" // Default value
+  presentationTitle = "Mi Presentación"
 }) => {
+  const displaySlideNumber = totalSlides > 0 ? currentSlideIndex + 1 : 0;
+
   return (
     <div className="h-16 bg-white p-3 border-b border-gray-300 flex justify-between items-center shadow-sm">
       <div className="text-lg font-semibold text-gray-700">
@@ -30,18 +30,20 @@ const TopBar: React.FC<TopBarProps> = ({
       <div className="flex items-center space-x-2">
         <button
           onClick={onPrevSlide}
-          disabled={!onPrevSlide || currentSlideNumber === 1 || totalSlides === 0 || currentSlideNumber === 0}
-          className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md disabled:opacity-50"
+          disabled={!onPrevSlide || currentSlideIndex === 0 || totalSlides === 0}
+          className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Anterior
         </button>
         <span className="text-sm text-gray-600 px-2">
-          Diapositiva {currentSlideNumber || '-'} de {totalSlides || '-'}
+          {totalSlides > 0
+            ? `Diapositiva ${displaySlideNumber} de ${totalSlides}`
+            : 'No hay diapositivas'}
         </span>
         <button
           onClick={onNextSlide}
-          disabled={!onNextSlide || currentSlideNumber === totalSlides || totalSlides === 0}
-          className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md disabled:opacity-50"
+          disabled={!onNextSlide || currentSlideIndex >= totalSlides - 1 || totalSlides === 0}
+          className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Siguiente
         </button>
@@ -51,14 +53,14 @@ const TopBar: React.FC<TopBarProps> = ({
         <button
           onClick={onAddSlide}
           disabled={!onAddSlide}
-          className="px-4 py-1.5 text-sm font-medium text-white bg-green-500 hover:bg-green-600 rounded-md disabled:opacity-50"
+          className="px-4 py-1.5 text-sm font-medium text-white bg-green-500 hover:bg-green-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Añadir Diapositiva
         </button>
         <button
           onClick={onDeleteSlide}
           disabled={!onDeleteSlide || totalSlides === 0}
-          className="px-4 py-1.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-md disabled:opacity-50"
+          className="px-4 py-1.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Eliminar Diapositiva
         </button>
@@ -67,5 +69,4 @@ const TopBar: React.FC<TopBarProps> = ({
   );
 };
 
-// The default export MUST be the TopBar component
 export default TopBar;
